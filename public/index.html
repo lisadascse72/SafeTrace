@@ -6,19 +6,30 @@
   <title>Emergency SOS</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <div class="container">
     <h1>🚨 Emergency SOS System</h1>
-    <p>This emergency alert system is designed to serve both <strong>disaster victims</strong> and ensure <strong>women's safety</strong> by allowing users to send an SOS with their live location.</p>
+    <p class="description">
+      Designed to help <strong>disaster victims</strong> and enhance <strong>women's safety</strong>. 
+      It allows you to send an SOS with your <strong>live location</strong> in a single click.
+    </p>
 
     <input type="text" id="name" placeholder="Your Name" />
     <input type="tel" id="phone" placeholder="Your Phone Number (optional)" />
-    <button id="sosBtn">Send SOS</button>
 
-    <div id="status"></div>
+    <div class="button-group">
+      <button id="sosBtn">🔴 Emergency SOS</button>
+      <button id="womenBtn">🟣 Women Safety Mode</button>
+    </div>
 
-    <!-- Optional: Link to Admin Dashboard -->
-    <a href="/admin-login.html" style="margin-top: 20px; display: block; color: crimson;">🔒 Admin Dashboard</a>
+    <button id="stopTrackingBtn" style="display:none;">⛔ Stop Tracking</button>
+
+    <!-- Separate status messages -->
+    <div id="sosStatus"></div>
+    <div id="womenStatus"></div>
+
+    <a href="/admin-login.html" class="admin-link">🔒 Admin Dashboard</a>
   </div>
 
   <footer>
@@ -26,43 +37,82 @@
   </footer>
 
   <script>
+    const nameInput = document.getElementById("name");
+    const phoneInput = document.getElementById("phone");
+    const sosStatusDiv = document.getElementById("sosStatus");
+    const womenStatusDiv = document.getElementById("womenStatus");
+    const stopBtn = document.getElementById("stopTrackingBtn");
+
+    let watchId = null;
+    let sessionId = null;
+
+    // 🔴 One-time SOS
     document.getElementById("sosBtn").addEventListener("click", () => {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const status = document.getElementById("status");
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
 
-      if (!name) {
-        alert("Please enter your name");
-        return;
-      }
-
-      if (!navigator.geolocation) {
-        status.innerHTML = `<p class="error">Geolocation not supported by this browser.</p>`;
-        return;
-      }
+      if (!name) return alert("Please enter your name");
+      if (!navigator.geolocation) return sosStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
 
       navigator.geolocation.getCurrentPosition(async (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+        const { latitude, longitude } = position.coords;
         const time = new Date().toLocaleString();
 
         try {
           const res = await fetch("/sos", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, phone, latitude, longitude, time })
           });
 
           const result = await res.json();
-          status.innerHTML = `<p class="success">✅ SOS Sent Successfully!</p>`;
+          sosStatusDiv.innerHTML = `<p class="success">✅ Emergency SOS Sent.</p>`;
         } catch (error) {
-          status.innerHTML = `<p class="error">❌ Failed to send SOS.</p>`;
+          sosStatusDiv.innerHTML = `<p class="error">❌ Failed to send SOS.</p>`;
         }
       }, (err) => {
-        status.innerHTML = `<p class="error">❌ Location Error: ${err.message}</p>`;
+        sosStatusDiv.innerHTML = `<p class="error">❌ Location Error: ${err.message}</p>`;
       });
+    });
+
+    // 🟣 Women Safety One-time SOS
+    document.getElementById("womenBtn").addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      const phone = phoneInput.value.trim();
+
+      if (!name) return alert("Please enter your name");
+      if (!navigator.geolocation) return womenStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
+
+      sessionId = `WSM-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const time = new Date().toLocaleString();
+
+        try {
+          await fetch("/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, latitude, longitude, time, sessionId })
+          });
+          womenStatusDiv.innerHTML = `<p class="success">✅ Women Safety SOS Sent.</p>`;
+        } catch (err) {
+          womenStatusDiv.innerHTML = `<p class="error">❌ Failed to send Women Safety SOS.</p>`;
+        }
+      }, (err) => {
+        womenStatusDiv.innerHTML = `<p class="error">❌ Tracking Error: ${err.message}</p>`;
+      });
+    });
+
+    // ⛔ Stop Tracking — hidden for now but kept for future
+    stopBtn.addEventListener("click", () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+
+      womenStatusDiv.innerHTML = `<p class="success">✅ Tracking Stopped.</p>`;
+      stopBtn.style.display = "none";
     });
   </script>
 </body>

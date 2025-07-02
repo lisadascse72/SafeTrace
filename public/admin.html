@@ -3,42 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SOS Dashboard</title>
+  <title>SOS Admin Dashboard</title>
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📍 SOS Alerts Dashboard</h1>
+    <h1>
+      📍 SOS Admin Dashboard
+      <button id="stopAlarmBtn" onclick="stopAlarm()" class="stop-btn">🔕 Stop Alarm</button>
+    </h1>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>S.No</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Time</th>
-            <th>Coordinates</th>
-            <th>Location</th>
-            <th>🔗 Map</th>
-            <th>✔️ Action</th>
-          </tr>
-        </thead>
-        <tbody id="alerts"></tbody>
-      </table>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button onclick="showTab('sos')" class="tab-btn active">🟥 Emergency SOS</button>
+      <button onclick="showTab('women')" class="tab-btn">🟣 Women Safety</button>
     </div>
 
+    <!-- Emergency SOS Table -->
+    <div id="sos" class="tab-content">
+      <h2>🟥 Emergency SOS Alerts</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Time</th>
+              <th>Coordinates</th>
+              <th>Location</th>
+              <th>Map</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="sos-alerts"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Women Safety Table -->
+    <div id="women" class="tab-content" style="display: none;">
+      <h2>🟣 Women Safety Requests</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Time</th>
+              <th>Coordinates</th>
+              <th>Location</th>
+              <th>Map</th>
+            </tr>
+          </thead>
+          <tbody id="women-alerts"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Alert Sound -->
     <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
   </div>
 
   <script>
-    let previousCount = 0;
+    let previousIDs = new Set();
+    let userInteracted = false;
+    let firstLoad = true;
+
+    document.body.addEventListener("click", () => userInteracted = true);
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tabContent => tabContent.style.display = 'none');
+      document.getElementById(tab).style.display = 'block';
+      document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+    }
+
+    function stopAlarm() {
+      const sound = document.getElementById("alertSound");
+      sound.pause();
+      sound.currentTime = 0;
+    }
 
     async function getLocationName(lat, lon) {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`, {
-          headers: { 'User-Agent': 'sos-web-app' }
-        });
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`);
         const data = await res.json();
         return data.display_name || "Unknown";
       } catch {
@@ -53,9 +103,8 @@
           const result = await res.json();
           alert(result.message);
           loadAlerts();
-        } catch (e) {
+        } catch {
           alert("❌ Failed to resolve SOS");
-          console.error(e);
         }
       }
     }
@@ -64,40 +113,73 @@
       try {
         const res = await fetch("/alerts");
         const data = await res.json();
-        const tbody = document.getElementById("alerts");
+        const sosBody = document.getElementById("sos-alerts");
+        const womenBody = document.getElementById("women-alerts");
 
-        if (data.length > previousCount) {
-          document.getElementById("alertSound").play();
-        }
-        previousCount = data.length;
+        let newSOSRows = "";
+        let newWomenRows = "";
 
-        tbody.innerHTML = "";
+        let sosCount = 0;
+        let womenCount = 0;
+        let isNewAlert = false;
 
-        for (let i = 0; i < data.length; i++) {
-          const item = data[i];
+        for (let item of data) {
+          const uniqueId = item.sessionId || (item.name + item.time);
+          if (!previousIDs.has(uniqueId)) {
+            isNewAlert = true;
+            previousIDs.add(uniqueId);
+          }
+
           const locationName = await getLocationName(item.latitude, item.longitude);
-          const mapsLink = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+          const mapsLink = `<a href="https://www.google.com/maps?q=${item.latitude},${item.longitude}" target="_blank">🌍 View</a>`;
+          const coord = `${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}`;
 
-          const row = `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${item.name}</td>
-              <td>${item.phone || "—"}</td>
-              <td>${item.time}</td>
-              <td>${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}</td>
-              <td>${locationName}</td>
-              <td><a href="${mapsLink}" target="_blank">🌍 View</a></td>
-              <td><button onclick="resolveSOS(${i})" class="resolve-btn">✔️ Resolved</button></td>
-            </tr>`;
-          tbody.innerHTML += row;
+          if (item.type === "sos") {
+            newSOSRows += `
+              <tr>
+                <td>${++sosCount}</td>
+                <td>${item.name}</td>
+                <td>${item.phone || "—"}</td>
+                <td>${item.time}</td>
+                <td>${coord}</td>
+                <td>${locationName}</td>
+                <td>${mapsLink}</td>
+                <td><button onclick="resolveSOS(${data.indexOf(item)})" class="resolve-btn">✔️ Resolved</button></td>
+              </tr>`;
+          } else if (item.type === "women-safety") {
+            newWomenRows += `
+              <tr>
+                <td>${++womenCount}</td>
+                <td>${item.name}</td>
+                <td>${item.phone || "—"}</td>
+                <td>${item.time}</td>
+                <td>${coord}</td>
+                <td>${locationName}</td>
+                <td>${mapsLink}</td>
+              </tr>`;
+          }
         }
-      } catch (e) {
-        console.error("❌ Failed to load alerts:", e);
+
+        if (sosBody.innerHTML !== newSOSRows) sosBody.innerHTML = newSOSRows;
+        if (womenBody.innerHTML !== newWomenRows) womenBody.innerHTML = newWomenRows;
+
+        if ((firstLoad && data.length > 0) || (isNewAlert && userInteracted)) {
+          try {
+            const sound = document.getElementById("alertSound");
+            sound.play();
+          } catch (e) {
+            console.warn("🔇 Notification sound blocked:", e);
+          }
+        }
+
+        firstLoad = false;
+      } catch (err) {
+        console.error("❌ Error loading alerts:", err);
       }
     }
 
     loadAlerts();
-    setInterval(loadAlerts, 10000);
+    setInterval(loadAlerts, 3000); // Quick detection without flicker
   </script>
 </body>
 </html>

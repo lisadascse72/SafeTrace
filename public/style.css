@@ -1,46 +1,63 @@
-/* General Body Styling */
+/* 🌐 General Body Styling */
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #fff5f5;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   min-height: 100vh;
   margin: 0;
   padding: 20px;
-  flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* Container Box */
+/* 📦 Main Container */
 .container {
   background: white;
-  padding: 30px;
+  padding: 30px 40px;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   text-align: center;
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   box-sizing: border-box;
 }
 
-/* Input and Button Styling */
+/* 🟥 Heading and Description */
+h1 {
+  margin-bottom: 10px;
+  color: crimson;
+}
+
+.description {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* ✏️ Input Fields & Buttons */
 input,
 button {
   padding: 12px;
   font-size: 16px;
   margin: 10px 0;
-  width: 80%;
+  width: 100%;
   border-radius: 8px;
-  border: 1px solid #ccc;
   box-sizing: border-box;
 }
 
-/* Placeholder styling */
+/* ⌨️ Input Fields */
+input {
+  border: 1px solid #ccc;
+}
+
 input::placeholder {
   color: #999;
 }
 
-/* Button Styling */
+/* 🔘 General Button Styling */
 button {
   background: crimson;
   color: white;
@@ -53,34 +70,62 @@ button:hover {
   background-color: darkred;
 }
 
-/* Success and Error Messages */
+/* 👯 Group Buttons Horizontally */
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* 🟣 Women Safety Button */
+#womenBtn {
+  background-color: #ff69b4; /* hot pink */
+}
+
+#womenBtn:hover {
+  background-color: #d64b91;
+}
+
+/* ⛔ Stop Tracking Button */
+#stopTrackingBtn {
+  background-color: #555;
+}
+
+#stopTrackingBtn:hover {
+  background-color: #333;
+}
+
+/* ✅ & ❌ Status Messages */
 .success {
   color: green;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .error {
   color: red;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
-/* Table Styling */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  font-size: 15px;
-  max-width: 100%;
+/* 🔐 Admin Link */
+.admin-link {
+  display: inline-block;
+  margin-top: 25px;
+  color: crimson;
+  font-weight: 500;
+  text-decoration: none;
 }
 
-th,
-td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: center;
+.admin-link:hover {
+  text-decoration: underline;
 }
 
-/* Footer Styling */
+/* 📄 Footer Styling */
 footer {
   margin-top: 40px;
   text-align: center;

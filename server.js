@@ -12,10 +12,10 @@ app.use(express.static("public"));
 
 const DATA_FILE = "sos_data.json";
 
-// Ensure data file exists
+// Ensure file exists
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
 
-// POST: Receive SOS
+// 🔴 POST: One-time SOS
 app.post("/sos", (req, res) => {
   const { name, phone, latitude, longitude, time } = req.body;
 
@@ -25,7 +25,14 @@ app.post("/sos", (req, res) => {
 
   try {
     const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
-    sosData.unshift({ name, phone: phone || null, latitude, longitude, time });
+    sosData.unshift({
+      name,
+      phone: phone || null,
+      latitude,
+      longitude,
+      time,
+      type: "sos" // explicitly label as emergency
+    });
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "✅ SOS received." });
   } catch (err) {
@@ -34,10 +41,41 @@ app.post("/sos", (req, res) => {
   }
 });
 
-// GET: Return all alerts
+// 🟣 POST: Women Safety (treated like SOS now)
+app.post("/track", (req, res) => {
+  const { name, phone, latitude, longitude, time, sessionId } = req.body;
+
+  if (!name || !latitude || !longitude || !time || !sessionId) {
+    return res.status(400).json({ message: "Missing tracking fields." });
+  }
+
+  try {
+    const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
+    sosData.unshift({
+      name,
+      phone: phone || null,
+      latitude,
+      longitude,
+      time,
+      sessionId,
+      type: "women-safety" // labeled separately
+    });
+    fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
+    res.json({ message: "📍 Women Safety alert received." });
+  } catch (err) {
+    console.error("❌ Failed to save tracking:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// ✅ GET: All Alerts
 app.get("/alerts", (req, res) => {
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE));
+    let data = JSON.parse(fs.readFileSync(DATA_FILE));
+
+    // filter out corrupt/null entries
+    data = data.filter(item => item && typeof item === 'object');
+
     res.json(data);
   } catch (err) {
     console.error("❌ Failed to read SOS data:", err);
@@ -45,7 +83,7 @@ app.get("/alerts", (req, res) => {
   }
 });
 
-// DELETE: Resolve (remove) SOS by index
+// ✅ DELETE: Remove by Index
 app.delete("/sos/:index", (req, res) => {
   const index = parseInt(req.params.index);
 
@@ -64,6 +102,7 @@ app.delete("/sos/:index", (req, res) => {
   }
 });
 
+// 🚀 Start
 app.listen(PORT, () => {
   console.log(`🚨 SOS Server running at http://localhost:${PORT}`);
 });
