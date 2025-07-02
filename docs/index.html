@@ -37,6 +37,8 @@
   </footer>
 
   <script>
+    const baseURL = "https://safetrace-production.up.railway.app";
+
     const nameInput = document.getElementById("name");
     const phoneInput = document.getElementById("phone");
     const sosStatusDiv = document.getElementById("sosStatus");
@@ -52,14 +54,17 @@
       const phone = phoneInput.value.trim();
 
       if (!name) return alert("Please enter your name");
-      if (!navigator.geolocation) return sosStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
+      if (!navigator.geolocation) {
+        sosStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
+        return;
+      }
 
       navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
         const time = new Date().toLocaleString();
 
         try {
-          const res = await fetch("/sos", {
+          const res = await fetch(`${baseURL}/sos`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, phone, latitude, longitude, time })
@@ -81,7 +86,10 @@
       const phone = phoneInput.value.trim();
 
       if (!name) return alert("Please enter your name");
-      if (!navigator.geolocation) return womenStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
+      if (!navigator.geolocation) {
+        womenStatusDiv.innerHTML = `<p class="error">Geolocation not supported.</p>`;
+        return;
+      }
 
       sessionId = `WSM-${Date.now()}-${Math.floor(Math.random()*1000)}`;
 
@@ -90,7 +98,7 @@
         const time = new Date().toLocaleString();
 
         try {
-          await fetch("/track", {
+          await fetch(`${baseURL}/track`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, phone, latitude, longitude, time, sessionId })
@@ -104,7 +112,7 @@
       });
     });
 
-    // ⛔ Stop Tracking — hidden for now but kept for future
+    // ⛔ Stop Tracking — future use
     stopBtn.addEventListener("click", () => {
       if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);

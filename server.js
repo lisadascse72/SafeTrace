@@ -8,7 +8,7 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static("docs")); // 🔧 changed from 'public' to 'docs'
 
 const DATA_FILE = "sos_data.json";
 
@@ -31,7 +31,7 @@ app.post("/sos", (req, res) => {
       latitude,
       longitude,
       time,
-      type: "sos" // explicitly label as emergency
+      type: "sos"
     });
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "✅ SOS received." });
@@ -41,7 +41,7 @@ app.post("/sos", (req, res) => {
   }
 });
 
-// 🟣 POST: Women Safety (treated like SOS now)
+// 🟣 POST: Women Safety
 app.post("/track", (req, res) => {
   const { name, phone, latitude, longitude, time, sessionId } = req.body;
 
@@ -58,7 +58,7 @@ app.post("/track", (req, res) => {
       longitude,
       time,
       sessionId,
-      type: "women-safety" // labeled separately
+      type: "women-safety"
     });
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "📍 Women Safety alert received." });
@@ -72,10 +72,7 @@ app.post("/track", (req, res) => {
 app.get("/alerts", (req, res) => {
   try {
     let data = JSON.parse(fs.readFileSync(DATA_FILE));
-
-    // filter out corrupt/null entries
     data = data.filter(item => item && typeof item === 'object');
-
     res.json(data);
   } catch (err) {
     console.error("❌ Failed to read SOS data:", err);

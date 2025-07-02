@@ -4,29 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
   <div class="container">
     <h1>🔐 Admin Login</h1>
+    <p class="description">Only authorized personnel can access the SOS dashboard. Please enter your admin password to proceed.</p>
+
     <input type="password" id="password" placeholder="Enter Admin Password">
     <button onclick="checkLogin()">Login</button>
-    <p id="loginStatus"></p>
+    <p id="loginStatus" class="error"></p>
   </div>
+
+  <footer>© 2025 Lisa Das. All rights reserved.</footer>
 
   <script>
     function checkLogin() {
       const pwd = document.getElementById("password").value.trim();
       const status = document.getElementById("loginStatus");
-
-      // 👇 Change this to your secret password
-      const ADMIN_PASSWORD = "rescue123";
+      const ADMIN_PASSWORD = "rescue123"; // ✅ You can change this password
 
       if (pwd === ADMIN_PASSWORD) {
         window.location.href = "/admin.html";
       } else {
         status.textContent = "❌ Incorrect password!";
-        status.style.color = "red";
       }
     }
   </script>
