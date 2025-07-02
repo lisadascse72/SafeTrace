@@ -1,0 +1,107 @@
+/* Base Body Styling */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #fff5f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* Main Container */
+.container {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 1100px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Heading Styling */
+.container h1 {
+  text-align: center;
+  color: crimson;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Input and Button Styling */
+input,
+button {
+  padding: 12px;
+  font-size: 16px;
+  margin: 10px 0;
+  width: 80%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background: crimson;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: darkred;
+}
+
+.resolve-btn {
+  background-color: green;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Feedback Messages */
+.success {
+  color: green;
+  margin-top: 20px;
+}
+
+.error {
+  color: red;
+  margin-top: 20px;
+}
+
+/* Responsive Table Wrapper */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  word-break: break-word;
+}
+
+th {
+  background-color: #f2f2f2;
+}
