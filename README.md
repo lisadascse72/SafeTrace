@@ -22,5 +22,13 @@ BUT you must provide proper credit by linking back to this repository or mention
 
 🔗 Original Author: Lisa Das 📦 Repository: https://github.com/lisadascse72/SafeTrace
 
+# SafeTrace - Emergency SOS & Women Safety App
+
+🚀 **Live Frontend:** [https://lisadascse72.github.io/SafeTrace/](https://lisadascse72.github.io/SafeTrace/)  
+🧠 **Backend API (Railway):** [https://safetrace-production.up.railway.app](https://safetrace-production.up.railway.app)
+
+This app helps users send emergency SOS and track live location in danger situations.
+
+
 🚫 Commercial use or redistribution without permission is not allowed.
 
