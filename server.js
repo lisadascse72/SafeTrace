@@ -5,32 +5,34 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const Alert = require("./models/Alert");
 
-// Load .env
+// Load environment variables from .env
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ MongoDB Connection
+// ✅ MongoDB Atlas URI from .env
 const uri = process.env.MONGO_URI;
-console.log("🌐 MONGO_URI:", uri); // Debug
 
-mongoose.connect(uri)
-  .then(() => console.log("✅ Connected to MongoDB Atlas"))
-  .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Fail fast if DB isn't connected
-  });
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB Atlas"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Static Routes
+// Routes
+
+// Home
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Admin
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
@@ -50,12 +52,12 @@ app.post("/sos", async (req, res) => {
     await Alert.create(data);
     res.json({ message: "✅ SOS alert saved" });
   } catch (err) {
-    console.error("❌ Error saving SOS alert:", err);
+    console.error(err);
     res.status(500).json({ message: "❌ Failed to save SOS alert" });
   }
 });
 
-// POST /track
+// POST /track (Women Safety)
 app.post("/track", async (req, res) => {
   try {
     const data = {
@@ -65,23 +67,22 @@ app.post("/track", async (req, res) => {
     await Alert.create(data);
     res.json({ message: "✅ Women safety alert saved" });
   } catch (err) {
-    console.error("❌ Error saving women safety alert:", err);
+    console.error(err);
     res.status(500).json({ message: "❌ Failed to save women safety alert" });
   }
 });
 
-// GET /alerts
+// GET all alerts
 app.get("/alerts", async (req, res) => {
   try {
-    const alerts = await Alert.find().sort({ _id: -1 }); // Latest first
+    const alerts = await Alert.find().sort({ _id: -1 }); // latest first
     res.json(alerts);
   } catch (err) {
-    console.error("❌ Error fetching alerts:", err);
     res.status(500).json({ message: "❌ Failed to fetch alerts" });
   }
 });
 
-// DELETE /sos/:index
+// DELETE alert (Mark resolved)
 app.delete("/sos/:index", async (req, res) => {
   try {
     const index = parseInt(req.params.index);
@@ -96,12 +97,11 @@ app.delete("/sos/:index", async (req, res) => {
 
     res.json({ message: "✔️ Alert marked as resolved" });
   } catch (err) {
-    console.error("❌ Error deleting alert:", err);
     res.status(500).json({ message: "❌ Failed to delete alert" });
   }
 });
 
-// Start Server
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
