@@ -2,13 +2,18 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const bodyParser = require("body-parser");
-const Alert = require("./models/Alert"); // MongoDB model
+const dotenv = require("dotenv");
+const Alert = require("./models/Alert");
+
+// Load environment variables from .env
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MongoDB Atlas Connection
-const uri = "mongodb+srv://iamlisadas2004:oDUbyeGUduPTQjzG@cluster0.713r2m0.mongodb.net/safetrace?retryWrites=true&w=majority&appName=Cluster0";
+// ✅ MongoDB Atlas URI from .env
+const uri = process.env.MONGO_URI;
+
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -22,7 +27,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Routes
 
-// Home route
+// Home
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
