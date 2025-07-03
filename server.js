@@ -4,13 +4,15 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static("docs")); // 🔧 changed from 'public' to 'docs'
+// ✅ MongoDB Atlas URI from .env
+const uri = process.env.MONGO_URI;
 
-const DATA_FILE = "sos_data.json";
+mongoose.connect(uri)
+
+.then(() => console.log("✅ Connected to MongoDB Atlas"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
 // Ensure file exists
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
