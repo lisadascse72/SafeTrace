@@ -26,8 +26,7 @@
 
 ## 🌐 Live Deployment
 
-- 🔗 **Frontend**: [https://lisadascse72.github.io/SafeTrace/](https://lisadascse72.github.io/SafeTrace/)
-- ⚙️ **Backend (Render)**: [https://safetrace-deploy.onrender.com](https://safetrace-deploy.onrender.com)
+- ⚙️ **Render**: [https://safetrace-deploy.onrender.com](https://safetrace-deploy.onrender.com)
 - 📊 **Admin Dashboard**: [https://safetrace-deploy.onrender.com/admin.html](https://safetrace-deploy.onrender.com/admin.html)
 
 ---
