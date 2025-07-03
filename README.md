@@ -1,34 +1,80 @@
-🛡️ SafeTrace — Emergency SOS & Women Safety Web App
-SafeTrace is a real-time emergency response web application designed to enhance public safety, especially during disasters and in women’s safety scenarios. With just a click, users can instantly send their live location as an SOS alert along with timing, helping admins respond quickly.
+# 🛡️ SafeTrace — Emergency SOS & Women Safety Web App
 
-🚀 Features
-🔴 Emergency SOS: One-click SOS with live location sent to admin.
-🟣 Women Safety Mode: Instant location alert for women in danger.
-📍 Admin Dashboard: Real-time view of all incoming alerts with map links and location info.
-🔔 Auto Alerts: New SOS requests trigger an alarm for instant admin awareness.
-✔️ Resolve SOS: Admins can mark alerts as resolved and remove them.
-🧑‍💻 Tech Stack
-Frontend: HTML, CSS, Vanilla JS
-Backend: Node.js, Express.js
-Database: JSON File (for now; future upgrade possible)
-APIs: OpenStreetMap Nominatim for reverse geocoding
-📄 License & Usage
-This project is open for educational and non-commercial use. You are free to:
+**SafeTrace** is a real-time emergency response web application built to enhance public safety, especially during emergencies and women's safety incidents. With just one click, users can send live location alerts to admins for quick intervention.
 
-✅ Clone
-✅ Modify
-✅ Use in your own projects
-BUT you must provide proper credit by linking back to this repository or mentioning the original author.
+---
 
-🔗 Original Author: Lisa Das 📦 Repository: https://github.com/lisadascse72/SafeTrace
+## 🚀 Features
 
-# SafeTrace - Emergency SOS & Women Safety App
+- 🔴 **Emergency SOS**: One-click SOS trigger that captures real-time location, name, phone, and timestamp.
+- 🟣 **Women Safety Mode**: Dedicated route to send women safety alerts instantly with location.
+- 📍 **Admin Dashboard**: Real-time dashboard showing all SOS & safety alerts with reverse-geocoded location and Google Maps links.
+- 🔔 **Auto Alerts**: Triggers an alarm sound for new incoming SOS alerts.
+- ✔️ **Resolve Button**: Admins can resolve SOS requests and delete them from the dashboard.
 
-🚀 **Live Frontend:** [https://lisadascse72.github.io/SafeTrace/](https://lisadascse72.github.io/SafeTrace/)  
-🧠 **Backend API (Railway):** [https://safetrace-production.up.railway.app](https://safetrace-production.up.railway.app)
+---
 
-This app helps users send emergency SOS and track live location in danger situations.
+## 🧑‍💻 Tech Stack
 
+- **Frontend**: HTML, CSS, Vanilla JavaScript  
+- **Backend**: Node.js, Express.js  
+- **Database**: MongoDB Atlas  
+- **APIs Used**: 
+  - [OpenStreetMap Nominatim API](https://nominatim.openstreetmap.org/) (for reverse geocoding)
 
-🚫 Commercial use or redistribution without permission is not allowed.
+---
+
+## 🌐 Live Deployment
+
+- 🔗 **Frontend**: [https://lisadascse72.github.io/SafeTrace/](https://lisadascse72.github.io/SafeTrace/)
+- ⚙️ **Backend (Render)**: [https://safetrace-deploy.onrender.com](https://safetrace-deploy.onrender.com)
+- 📊 **Admin Dashboard**: [https://safetrace-deploy.onrender.com/admin.html](https://safetrace-deploy.onrender.com/admin.html)
+
+---
+
+## 🧪 Usage & How It Works
+
+1. **User side** (`index.html`):
+   - Enters name & phone, taps SOS → triggers `/sos` or `/track` POST API.
+   - Sends geolocation to server.
+
+2. **Server side** (`server.js`):
+   - Stores alerts in MongoDB.
+   - Serves frontend static files.
+   - Provides `/alerts` API for dashboard.
+
+3. **Admin side** (`admin.html`):
+   - Polls `/alerts` every 3 seconds.
+   - Displays SOS entries in a table.
+   - Triggers alert sound when new data arrives.
+   - Reverse geocodes coordinates to human-readable locations.
+
+---
+
+## 📄 License & Usage
+
+This project is open for **educational** and **non-commercial** use only.
+
+### ✅ You Can:
+- Clone and modify it
+- Use it in academic or hackathon projects
+
+### ❌ You Cannot:
+- Redistribute it for commercial purposes
+- Claim it as your own without credit
+
+> Please provide proper credit by linking back to this repository or mentioning the original author.
+
+---
+
+## 👤 Author
+
+**🔗 Lisa Das**  
+📦 GitHub Repository: [https://github.com/lisadascse72/SafeTrace](https://github.com/lisadascse72/SafeTrace)  
+🌐 LinkedIn: [https://www.linkedin.com/in/lisa-das-9aab0a244](https://www.linkedin.com/in/lisa-das-9aab0a244)
+
+---
+
+### 🚫 Disclaimer
+This tool is **not a substitute** for professional emergency systems. Always contact official authorities in real-life emergencies.
 
