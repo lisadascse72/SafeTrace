@@ -14,10 +14,8 @@ const PORT = process.env.PORT || 3000;
 // ✅ MongoDB Atlas URI from .env
 const uri = process.env.MONGO_URI;
 
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(uri)
+
 .then(() => console.log("✅ Connected to MongoDB Atlas"))
 .catch(err => console.error("❌ MongoDB connection error:", err));
 
