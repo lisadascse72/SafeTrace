@@ -123,7 +123,8 @@
         let womenCount = 0;
         let isNewAlert = false;
 
-        for (let item of data) {
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
           const uniqueId = item.sessionId || (item.name + item.time);
           if (!previousIDs.has(uniqueId)) {
             isNewAlert = true;
@@ -144,7 +145,7 @@
                 <td>${coord}</td>
                 <td>${locationName}</td>
                 <td>${mapsLink}</td>
-                <td><button onclick="resolveSOS(${data.indexOf(item)})" class="resolve-btn">✔️ Resolved</button></td>
+                <td><button onclick="resolveSOS(${i})" class="resolve-btn">✔️ Resolved</button></td>
               </tr>`;
           } else if (item.type === "women-safety") {
             newWomenRows += `
@@ -179,7 +180,7 @@
     }
 
     loadAlerts();
-    setInterval(loadAlerts, 3000); // Quick detection without flicker
+    setInterval(loadAlerts, 3000); // Quick detection
   </script>
 </body>
 </html>

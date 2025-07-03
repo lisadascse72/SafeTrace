@@ -1,105 +1,102 @@
-// server.js
 const express = require("express");
-const fs = require("fs");
+const mongoose = require("mongoose");
 const path = require("path");
-const cors = require("cors");
+const bodyParser = require("body-parser");
+const Alert = require("./models/Alert"); // MongoDB model
 
 const app = express();
-const PORT = process.env.PORT || 3000; // ✅ Railway uses dynamic port
+const PORT = process.env.PORT || 3000;
 
-// ✅ Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public"))); // ✅ serve frontend
+// MongoDB Atlas Connection
+const uri = "mongodb+srv://iamlisadas2004:oDUbyeGUduPTQjzG@cluster0.713r2m0.mongodb.net/safetrace?retryWrites=true&w=majority&appName=Cluster0";
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("✅ Connected to MongoDB Atlas"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
-const DATA_FILE = "sos_data.json";
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Ensure data file exists
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, "[]");
-}
+// Routes
 
-// 🔴 POST: Emergency SOS
-app.post("/sos", (req, res) => {
-  const { name, phone, latitude, longitude, time } = req.body;
-  if (!name || !latitude || !longitude || !time) {
-    return res.status(400).json({ message: "Missing required fields." });
-  }
+// Home route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
+// Admin
+app.get("/admin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+app.get("/admin-login.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin-login.html"));
+});
+
+// POST /sos
+app.post("/sos", async (req, res) => {
   try {
-    const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
-    sosData.unshift({
-      name,
-      phone: phone || null,
-      latitude,
-      longitude,
-      time,
-      type: "sos"
-    });
-    fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
-    res.json({ message: "✅ SOS received." });
+    const data = {
+      ...req.body,
+      type: "sos",
+      sessionId: `SOS-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+    };
+    await Alert.create(data);
+    res.json({ message: "✅ SOS alert saved" });
   } catch (err) {
-    console.error("❌ Failed to save SOS:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error(err);
+    res.status(500).json({ message: "❌ Failed to save SOS alert" });
   }
 });
 
-// 🟣 POST: Women Safety
-app.post("/track", (req, res) => {
-  const { name, phone, latitude, longitude, time, sessionId } = req.body;
-  if (!name || !latitude || !longitude || !time || !sessionId) {
-    return res.status(400).json({ message: "Missing tracking fields." });
-  }
-
+// POST /track (Women Safety)
+app.post("/track", async (req, res) => {
   try {
-    const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
-    sosData.unshift({
-      name,
-      phone: phone || null,
-      latitude,
-      longitude,
-      time,
-      sessionId,
+    const data = {
+      ...req.body,
       type: "women-safety"
-    });
-    fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
-    res.json({ message: "📍 Women Safety alert received." });
+    };
+    await Alert.create(data);
+    res.json({ message: "✅ Women safety alert saved" });
   } catch (err) {
-    console.error("❌ Failed to save tracking:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error(err);
+    res.status(500).json({ message: "❌ Failed to save women safety alert" });
   }
 });
 
-// ✅ GET: All Alerts
-app.get("/alerts", (req, res) => {
+// GET all alerts
+app.get("/alerts", async (req, res) => {
   try {
-    let data = JSON.parse(fs.readFileSync(DATA_FILE));
-    data = data.filter(item => item && typeof item === 'object');
-    res.json(data);
+    const alerts = await Alert.find().sort({ _id: -1 }); // latest first
+    res.json(alerts);
   } catch (err) {
-    console.error("❌ Failed to read SOS data:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "❌ Failed to fetch alerts" });
   }
 });
 
-// ✅ DELETE: Resolve by index
-app.delete("/sos/:index", (req, res) => {
-  const index = parseInt(req.params.index);
+// DELETE alert (Mark resolved)
+app.delete("/sos/:index", async (req, res) => {
   try {
-    const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
-    if (isNaN(index) || index < 0 || index >= sosData.length) {
-      return res.status(404).json({ message: "Invalid SOS index." });
+    const index = parseInt(req.params.index);
+    const alerts = await Alert.find().sort({ _id: -1 });
+
+    if (index < 0 || index >= alerts.length) {
+      return res.status(404).json({ message: "❌ Invalid alert index" });
     }
-    sosData.splice(index, 1);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
-    res.json({ message: "✔️ SOS marked as resolved and removed." });
+
+    const alertToDelete = alerts[index];
+    await Alert.findByIdAndDelete(alertToDelete._id);
+
+    res.json({ message: "✔️ Alert marked as resolved" });
   } catch (err) {
-    console.error("❌ Error deleting SOS:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "❌ Failed to delete alert" });
   }
 });
 
-// 🚀 Start Server
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚨 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
