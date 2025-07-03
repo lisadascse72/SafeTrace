@@ -1,24 +1,27 @@
+// server.js
 const express = require("express");
 const fs = require("fs");
-const cors = require("cors");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // ✅ Railway uses dynamic port
 
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public"))); // ✅ serve frontend
 
 const DATA_FILE = "sos_data.json";
 
-// Ensure file exists
-if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
+// ✅ Ensure data file exists
+if (!fs.existsSync(DATA_FILE)) {
+  fs.writeFileSync(DATA_FILE, "[]");
+}
 
-// 🔴 POST: One-time SOS
+// 🔴 POST: Emergency SOS
 app.post("/sos", (req, res) => {
   const { name, phone, latitude, longitude, time } = req.body;
-
   if (!name || !latitude || !longitude || !time) {
     return res.status(400).json({ message: "Missing required fields." });
   }
@@ -31,7 +34,7 @@ app.post("/sos", (req, res) => {
       latitude,
       longitude,
       time,
-      type: "sos" // explicitly label as emergency
+      type: "sos"
     });
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "✅ SOS received." });
@@ -41,10 +44,9 @@ app.post("/sos", (req, res) => {
   }
 });
 
-// 🟣 POST: Women Safety (treated like SOS now)
+// 🟣 POST: Women Safety
 app.post("/track", (req, res) => {
   const { name, phone, latitude, longitude, time, sessionId } = req.body;
-
   if (!name || !latitude || !longitude || !time || !sessionId) {
     return res.status(400).json({ message: "Missing tracking fields." });
   }
@@ -58,7 +60,7 @@ app.post("/track", (req, res) => {
       longitude,
       time,
       sessionId,
-      type: "women-safety" // labeled separately
+      type: "women-safety"
     });
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "📍 Women Safety alert received." });
@@ -72,10 +74,7 @@ app.post("/track", (req, res) => {
 app.get("/alerts", (req, res) => {
   try {
     let data = JSON.parse(fs.readFileSync(DATA_FILE));
-
-    // filter out corrupt/null entries
     data = data.filter(item => item && typeof item === 'object');
-
     res.json(data);
   } catch (err) {
     console.error("❌ Failed to read SOS data:", err);
@@ -83,16 +82,14 @@ app.get("/alerts", (req, res) => {
   }
 });
 
-// ✅ DELETE: Remove by Index
+// ✅ DELETE: Resolve by index
 app.delete("/sos/:index", (req, res) => {
   const index = parseInt(req.params.index);
-
   try {
     const sosData = JSON.parse(fs.readFileSync(DATA_FILE));
     if (isNaN(index) || index < 0 || index >= sosData.length) {
       return res.status(404).json({ message: "Invalid SOS index." });
     }
-
     sosData.splice(index, 1);
     fs.writeFileSync(DATA_FILE, JSON.stringify(sosData, null, 2));
     res.json({ message: "✔️ SOS marked as resolved and removed." });
@@ -102,7 +99,7 @@ app.delete("/sos/:index", (req, res) => {
   }
 });
 
-// 🚀 Start
+// 🚀 Start Server
 app.listen(PORT, () => {
-  console.log(`🚨 SOS Server running at http://localhost:${PORT}`);
+  console.log(`🚨 Server running at http://localhost:${PORT}`);
 });
