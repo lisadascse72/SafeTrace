@@ -60,18 +60,7 @@ pip install -r requirements.txt
 # or
 npm install
 
-
-## 📄 License & Usage
-
-This project is open for **educational** and **non-commercial** use only.
-
-### ✅ You Can:
-- Clone and modify it
-- Use it in academic or hackathon projects
-
-### ❌ You Cannot:
-- Redistribute it for commercial purposes
-- Claim it as your own without credit
+```
 
 > Please provide proper credit by linking back to this repository or mentioning the original author.
 
