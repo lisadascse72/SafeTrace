@@ -50,6 +50,17 @@
 
 ---
 
+## 🛠️ Setup & Usage
+
+### 1. Clone the repo:
+```bash
+git clone https://github.com/lisadascse72/SafeTrace.git
+cd SafeTrace
+pip install -r requirements.txt
+# or
+npm install
+
+
 ## 📄 License & Usage
 
 This project is open for **educational** and **non-commercial** use only.
